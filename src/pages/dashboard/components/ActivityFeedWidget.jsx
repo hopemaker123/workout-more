@@ -1,72 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
+import { fetchActivityFeed } from '../../../utils/api';
 
 const ActivityFeedWidget = () => {
   const [filter, setFilter] = useState('all');
+  const [activities, setActivities] = useState([]);
 
-  const activities = [
-    {
-      id: 1,
-      type: 'job',
-      title: 'Application submitted to TechCorp',
-      description: 'Senior React Developer position',
-      timestamp: '2025-09-24T16:30:00Z',
-      status: 'pending',
-      icon: 'Briefcase',
-      color: 'text-blue-600'
-    },
-    {
-      id: 2,
-      type: 'marketing',
-      title: 'Campaign performance update',
-      description: 'Social Media Campaign #SM-2024-09 - 15% CTR increase',
-      timestamp: '2025-09-24T15:45:00Z',
-      status: 'success',
-      icon: 'TrendingUp',
-      color: 'text-green-600'
-    },
-    {
-      id: 3,
-      type: 'realestate',
-      title: 'Property inquiry received',
-      description: 'Downtown Condo - 123 Main St, potential buyer interested',
-      timestamp: '2025-09-24T14:20:00Z',
-      status: 'new',
-      icon: 'Home',
-      color: 'text-orange-600'
-    },
-    {
-      id: 4,
-      type: 'job',
-      title: 'Interview scheduled',
-      description: 'StartupXYZ - Product Manager role, Sept 26 at 2:00 PM',
-      timestamp: '2025-09-24T13:15:00Z',
-      status: 'scheduled',
-      icon: 'Calendar',
-      color: 'text-purple-600'
-    },
-    {
-      id: 5,
-      type: 'marketing',
-      title: 'New client proposal sent',
-      description: 'Digital Marketing Package for Local Restaurant Chain',
-      timestamp: '2025-09-24T12:30:00Z',
-      status: 'sent',
-      icon: 'Send',
-      color: 'text-indigo-600'
-    },
-    {
-      id: 6,
-      type: 'realestate',
-      title: 'Market analysis completed',
-      description: 'Q3 2024 Downtown District Report - Property values up 8%',
-      timestamp: '2025-09-24T11:45:00Z',
-      status: 'completed',
-      icon: 'BarChart3',
-      color: 'text-teal-600'
-    }
-  ];
+  useEffect(() => {
+    const getActivities = async () => {
+      try {
+        const activityData = await fetchActivityFeed();
+        setActivities(activityData);
+      } catch (error) {
+        console.error("Error fetching activity feed:", error);
+      }
+    };
+
+    getActivities();
+  }, []);
 
   const filterOptions = [
     { value: 'all', label: 'All Activities', icon: 'Activity' },
@@ -137,7 +89,7 @@ const ActivityFeedWidget = () => {
       </div>
       {/* Activity List */}
       <div className="space-y-4 max-h-96 overflow-y-auto scrollbar-professional">
-        {filteredActivities?.map((activity) => (
+        {filteredActivities.length > 0 ? filteredActivities?.map((activity) => (
           <div
             key={activity?.id}
             className="flex items-start space-x-4 p-4 rounded-lg border border-border hover:border-primary/20 hover:bg-muted/30 transition-all duration-base"
@@ -165,7 +117,7 @@ const ActivityFeedWidget = () => {
               </div>
             </div>
           </div>
-        ))}
+        )) : <p>No activities to display. Please make sure the database is running and accessible.</p>}
       </div>
       <div className="mt-6 pt-4 border-t border-border">
         <Button

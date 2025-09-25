@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Icon from '../AppIcon';
@@ -6,6 +7,7 @@ import Button from './Button';
 const Header = ({ className = '' }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -14,7 +16,10 @@ const Header = ({ className = '' }) => {
     { name: 'Opportunities', path: '/opportunity-explorer', icon: 'Search' },
     { name: 'Profile', path: '/professional-profile', icon: 'User' },
     { name: 'Services', path: '/services-marketplace', icon: 'Store' },
-    { name: 'Resources', path: '/resource-library', icon: 'BookOpen' }
+    { name: 'Resources', path: '/resource-library', icon: 'BookOpen' },
+    { name: 'Real Estate', path: '/real-estate', icon: 'Home' },
+    { name: 'Marketing', path: '/marketing', icon: 'Target' },
+    { name: 'Job Placement', path: '/job-placement', icon: 'Briefcase' },
   ];
 
   const moreMenuItems = [
@@ -32,9 +37,20 @@ const Header = ({ className = '' }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    setIsAuthenticated(authStatus === 'true');
+  }, [location]);
+
   const handleNavigation = (path) => {
     navigate(path);
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+    navigate('/homepage');
   };
 
   const isActivePath = (path) => {
@@ -47,12 +63,7 @@ const Header = ({ className = '' }) => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-header transition-all duration-base ${
-        isScrolled 
-          ? 'bg-background/95 backdrop-blur-professional shadow-professional border-b border-border' 
-          : 'bg-background/80 backdrop-blur-sm'
-      } ${className}`}
-    >
+      className={`fixed top-0 left-0 right-0 z-header transition-all duration-base ${isScrolled ? 'bg-background/95 backdrop-blur-professional shadow-professional border-b border-border' : 'bg-background/80 backdrop-blur-sm'} ${className}`}>
       <div className="w-full">
         <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
           {/* Logo Section */}
@@ -89,12 +100,7 @@ const Header = ({ className = '' }) => {
               <button
                 key={item?.path}
                 onClick={() => handleNavigation(item?.path)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-base focus-professional ${
-                  isActivePath(item?.path)
-                    ? 'bg-primary text-primary-foreground shadow-professional'
-                    : 'text-text-primary hover:bg-muted hover:text-primary'
-                }`}
-              >
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-base focus-professional ${isActivePath(item?.path) ? 'bg-primary text-primary-foreground shadow-professional' : 'text-text-primary hover:bg-muted hover:text-primary'}`}>
                 <Icon 
                   name={item?.icon} 
                   size={18} 
@@ -130,26 +136,23 @@ const Header = ({ className = '' }) => {
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              iconName="Bell"
-              iconPosition="left"
-              className="relative"
-            >
-              Notifications
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full"></span>
-            </Button>
-            
-            <Button
-              variant="default"
-              size="sm"
-              iconName="Plus"
-              iconPosition="left"
-              onClick={() => handleNavigation('/opportunity-explorer')}
-            >
-              Explore
-            </Button>
+            {isAuthenticated ? (
+                 <Button
+                 variant="outline"
+                 size="sm"
+                 onClick={handleLogout}
+               >
+                 Logout
+               </Button>
+            ) : (
+                <Button
+                variant="default"
+                size="sm"
+                onClick={() => handleNavigation('/login')}
+              >
+                Login
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -174,12 +177,7 @@ const Header = ({ className = '' }) => {
                 <button
                   key={item?.path}
                   onClick={() => handleNavigation(item?.path)}
-                  className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-base ${
-                    isActivePath(item?.path)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-text-primary hover:bg-muted'
-                  }`}
-                >
+                  className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-base ${isActivePath(item?.path) ? 'bg-primary text-primary-foreground' : 'text-text-primary hover:bg-muted'}`}>
                   <Icon 
                     name={item?.icon} 
                     size={20} 
