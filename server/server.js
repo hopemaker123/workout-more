@@ -9,7 +9,7 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Make the pool available to other modules
+// Create a single database pool
 const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
@@ -17,17 +17,26 @@ const pool = new Pool({
   password: process.env.PGPASSWORD,
   port: process.env.PGPORT,
 });
-app.set('pool', pool);
 
-// API routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/dashboard', require('./routes/dashboard'));
-app.use('/api/services', require('./routes/services'));
-app.use('/api/categories', require('./routes/categories'));
-app.use('/api/opportunities', require('./routes/opportunities'));
-app.use('/api/real-estate', require('./routes/real-estate'));
-app.use('/api/marketing', require('./routes/marketing'));
-app.use('/api/jobs', require('./routes/jobs'));
+// Import and use routes, passing the pool to each
+const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboard');
+const servicesRoutes = require('./routes/services');
+const categoriesRoutes = require('./routes/categories');
+const opportunitiesRoutes = require('./routes/opportunities');
+const realEstateRoutes = require('./routes/real-estate');
+const marketingRoutes = require('./routes/marketing');
+const jobsRoutes = require('./routes/jobs');
+
+app.use('/api/auth', authRoutes(pool));
+app.use('/api/dashboard', dashboardRoutes(pool));
+app.use('/api/services', servicesRoutes(pool));
+app.use('/api/categories', categoriesRoutes(pool));
+app.use('/api/opportunities', opportunitiesRoutes(pool));
+app.use('/api/real-estate', realEstateRoutes(pool));
+app.use('/api/marketing', marketingRoutes(pool));
+app.use('/api/jobs', jobsRoutes(pool));
+
 
 app.get('/', (req, res) => {
   res.send('Hello from the backend!');
